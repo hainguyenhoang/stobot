@@ -1,3 +1,4 @@
+use std::env;
 use chrono::prelude::*;
 use serde_json::Value;
 use serde_json::Value::Number;
@@ -33,10 +34,9 @@ async fn get_news_ids(count: u64) -> Vec<u64>{
         return ids;
     }
     for i in 0..count{
-        let i = usize::try_from(i).expect(format!("Couldn't convert {i} from u64 to usize").as_str());
-        if let Number(id) = &json["news"][i]["id"]{
-            if let Some(as_64) = id.as_u64(){
-                ids.push(as_64);
+        if let Number(id) = &json["news"][i as usize]["id"]{
+            if let Some(parsed_id) = id.as_u64(){
+                ids.push(parsed_id);
             }
         }
     }
@@ -50,4 +50,13 @@ pub fn out_log(msg: &str){
 
 pub fn err_log(msg: &str){
     eprintln!("{}:\t{}", Utc::now(), msg);
+}
+
+pub fn parse_arg() -> Option<u64> {
+    if let Some(next_arg) = env::args().next(){
+        if let Ok(parsed_arg) = next_arg.parse::<u64>(){
+            return Some(parsed_arg);
+        }
+    }
+    None
 }
