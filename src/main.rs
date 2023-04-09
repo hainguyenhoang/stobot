@@ -4,16 +4,9 @@ use std::io::{BufRead, BufReader};
 
 use serenity::prelude::*;
 use stobot::handler::Handler;
-use stobot::out_log;
 
 #[tokio::main]
 async fn main() {
-    for _ in 1..=64{
-        print!("-");
-        eprint!("-");
-    }
-    println!();
-    eprintln!();
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
@@ -26,10 +19,10 @@ async fn main() {
     if let Some(p) = stobot::parse_arg(){
         poll_count = p;
     }
-    out_log(format!("Polling period: {poll_period}").as_str());
-    out_log(format!("Poll count: {poll_count}").as_str());
+    println!("Polling period: {poll_period}");
+    println!("Poll count: {poll_count}");
     let handler = Handler::new(poll_period, poll_count);
-    stobot::out_log("Reading channels.txt");
+    println!("Reading channels.txt");
     if let Ok(file) = File::open("channels.txt"){
         for line in BufReader::new(file).lines(){
             if let Ok(parsed_line) = line{
@@ -39,15 +32,15 @@ async fn main() {
             }
         }
     }
-    stobot::out_log("Channels:");
+    print!("Channels:");
     let channels = handler.get_channels();
     for channel in channels.iter(){
-        print!("{channel}");
+        print!(" {channel}");
     }
     println!();
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");
     if let Err(why) = client.start().await {
-        stobot::err_log(format!("Client error: {why}").as_str());
+        eprintln!("Client error: {why}");
     }
 }

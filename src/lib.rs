@@ -1,5 +1,4 @@
 use std::env;
-use chrono::prelude::*;
 use serde_json::Value;
 use serde_json::Value::Number;
 use serde_json::Value::Null;
@@ -9,19 +8,19 @@ pub mod handler;
 async fn get_news_json(count: u64) -> Value {
     let request = reqwest::get(format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}")).await;
     if let Err(why) = request {
-        err_log(format!("Error with the request: {why}").as_str());
+        eprintln!("Error with the request: {why}");
         return Null;
     }
     let text = request.unwrap().text().await;
     if let Err(why) = text {
-        err_log(format!("Error with the text: {why}").as_str());
+        eprintln!("Error with the text: {why}");
         return Null;
     }
     let parsed_json: serde_json::Result<Value> = serde_json::from_str(text.unwrap().as_str());
     match parsed_json {
         Ok(json) => json,
         Err(why) => {
-            err_log(format!("Error while parsing the json: {why}").as_str());
+            eprintln!("Error while parsing the json: {why}");
             Null
         }
     }
@@ -42,14 +41,6 @@ async fn get_news_ids(count: u64) -> Vec<u64>{
     }
 
     ids
-}
-
-pub fn out_log(msg: &str){
-    println!("{}:\t{}", Utc::now(), msg);
-}
-
-pub fn err_log(msg: &str){
-    eprintln!("{}:\t{}", Utc::now(), msg);
 }
 
 pub fn parse_arg() -> Option<u64> {

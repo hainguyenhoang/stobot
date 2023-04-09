@@ -11,8 +11,6 @@ use serenity::model::gateway::Ready;
 use serenity::model::id::ChannelId;
 use serenity::prelude::*;
 
-use crate::out_log;
-use crate::err_log;
 use crate::get_news_ids;
 
 pub struct Handler {
@@ -39,7 +37,7 @@ impl Handler{
     fn set_latest_id(&self, value: u64){
         let mut num = self.latest_news.lock().unwrap();
         *num = value;
-        out_log(format!("ID of latest news: {value}").as_str());
+        println!("ID of latest news: {value}");
     }
 
     pub fn get_channels(&self) -> HashSet<u64> {
@@ -47,9 +45,8 @@ impl Handler{
     }
 
     fn write_channels_to_file(map: MutexGuard<HashSet<u64>>){
+        let mut file = File::create("channels.txt").expect("Couldn't open channels.txt");
         for id in map.iter(){
-            let mut file = File::create("channels.txt")
-                .expect("Couldn't open channels.txt");
             writeln!(file, "{id}").expect("Couldn't write to channels.txt");
         }
     }
@@ -74,30 +71,30 @@ impl EventHandler for Handler {
         match msg.content.as_str() {
             "!stobot" => {
                 self.add_channel(id);
-                out_log(format!("Registered channel with ID {id}").as_str());
+                println!("Registered channel with ID {id}");
                 let mut out_str = String::from("Registered channels:");
                 let registered_channels = self.get_channels();
                 for channel in registered_channels.iter(){
                     out_str += format!(" {channel}").as_str();
                 }
-                out_log(&out_str);
+                println!("{out_str}");
                 let response = "This channel will now have STO news posted.";
                 if let Err(why) = msg.channel_id.say(&ctx.http, response).await {
-                    err_log(format!("Error sending message: {why}").as_str());
+                    eprintln!("Error sending message: {why}");
                 }
             }
             "!unstobot" => {
                 self.remove_channel(id);
-                out_log(format!("Removed channel with ID {id}").as_str());
+                println!("Removed channel with ID {id}");
                 let mut out_str = String::from("Registered channels:");
                 let registered_channels = self.get_channels();
                 for channel in registered_channels.iter(){
                     out_str += format!(" {channel}").as_str();
                 }
-                out_log(&out_str);
+                println!("{out_str}");
                 let response = "This channel will no longer have STO news posted.";
                 if let Err(why) = msg.channel_id.say(&ctx.http, response).await {
-                    err_log(format!("Error sending message: {why}").as_str());
+                    eprintln!("Error sending message: {why}");
                 }
             }
             _ => {}
@@ -106,10 +103,10 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, _: Ready) {
         let news_ids = get_news_ids(1);
-        out_log("It's alive!");
+        println!("It's alive!");
         match news_ids.await.get(0) {
             Some(id) => self.set_latest_id(*id),
-            None => err_log("Couldn't get the ID of the latest news")
+            None => eprintln!("Couldn't get the ID of the latest news")
         }
         loop {
             sleep(Duration::from_secs(self.poll_period));
@@ -125,7 +122,7 @@ impl EventHandler for Handler {
                 }
             };
             if new_news_count > 0 {
-                out_log(format!("Found {new_news_count} new news").as_str())
+                println!("Found {new_news_count} new news");
             }
             let news_ids = &news_ids[..new_news_count];
             for news_id in news_ids.iter().rev(){
@@ -133,9 +130,9 @@ impl EventHandler for Handler {
                 for channel_id in self.get_channels().iter(){
                     let channel_id = *channel_id;
                     let channel = ChannelId(channel_id);
-                    out_log(format!("Sending news with ID {news_id} to channel with ID {channel_id}").as_str());
+                    println!("Sending news with ID {news_id} to channel with ID {channel_id}");
                     if let Err(why) = channel.say(&ctx.http, &url).await {
-                        err_log(format!("Error sending message: {why}").as_str());
+                        eprintln!("Error sending message: {why}");
                     }
                 }
             }
