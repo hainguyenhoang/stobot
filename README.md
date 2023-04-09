@@ -8,4 +8,7 @@ A Discord bot that fetches Star Trek Online news as they come out.
 ## Run instructions
 1. Set the `DISCORD_TOKEN` environment variable to your Discord bot's token
 2. Either run `cargo run --release` or the compiled `stobot` executable directly
-3. 
+3. In your desired channel, type this: `!stobot`
+   * The bot should respond to this, and then you'll receive future news in that channel.
+   * To stop the bot posting there, type `!unstobot`
+   * 
