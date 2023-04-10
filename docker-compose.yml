@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  rust:
+    image: rust
+    user: 1000:1000
+    volumes:
+      - ./cargo_home:/cargo_home
+    environment:
+      - CARGO_HOME=/cargo_home
