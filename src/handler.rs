@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::fs::File;
-use std::io::Write;
+use std::io::{BufRead, BufReader, Write};
 use std::sync::{Mutex, MutexGuard};
 use std::thread::sleep;
 use std::time::Duration;
@@ -22,12 +22,29 @@ pub struct Handler {
 
 impl Handler{
     pub fn new(poll_period: u64, poll_count: u64) -> Handler {
-        Handler {
+        let handler = Handler {
             poll_period,
             poll_count,
             latest_news: Mutex::new(0),
             channel_ids: Mutex::new(HashSet::new())
+        };
+        println!("Reading channels.txt");
+        if let Ok(file) = File::open("channels.txt"){
+            for line in BufReader::new(file).lines(){
+                if let Ok(parsed_line) = line{
+                    if let Ok(parsed_id) = parsed_line.parse::<u64>(){
+                        handler.add_channel(parsed_id);
+                    }
+                }
+            }
         }
+        print!("Channels:");
+        let channels = handler.get_channels();
+        for channel in channels.iter(){
+            print!(" {channel}");
+        }
+        println!();
+        handler
     }
 
     fn get_latest_id(&self) -> u64 {
