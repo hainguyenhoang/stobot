@@ -134,7 +134,9 @@ impl EventHandler for Handler {
                     pos_of_last_news
                 },
                 None => {
-                    self.set_latest_id(news_ids[0]);
+                    if let Some(id) = news_ids.get(0){
+                        self.set_latest_id(*id);
+                    }
                     self.poll_count as usize
                 }
             };
