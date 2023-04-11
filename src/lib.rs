@@ -4,9 +4,11 @@ use serde_json::Value::Number;
 use serde_json::Value::Null;
 
 pub mod handler;
+mod news;
 
 async fn get_news_json(count: u64) -> Value {
-    let request = reqwest::get(format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}")).await;
+    let url = format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}&field[]=images.img_microsite_background&field[]=platforms");
+    let request = reqwest::get(url).await;
     if let Err(why) = request {
         eprintln!("Error with the request: {why}");
         return Null;
