@@ -11,12 +11,11 @@ use serenity::model::gateway::Ready;
 use serenity::model::id::ChannelId;
 use serenity::prelude::*;
 
-use crate::get_news_ids;
+use crate::news::News;
 
 pub struct Handler {
     poll_period: u64,
     poll_count: u64,
-    latest_news: Mutex<u64>,
     channel_ids: Mutex<HashSet<u64>>
 }
 
@@ -25,7 +24,6 @@ impl Handler{
         let handler = Handler {
             poll_period,
             poll_count,
-            latest_news: Mutex::new(0),
             channel_ids: Mutex::new(HashSet::new())
         };
         println!("Reading channels.txt");
@@ -45,16 +43,6 @@ impl Handler{
         }
         println!();
         handler
-    }
-
-    fn get_latest_id(&self) -> u64 {
-        *self.latest_news.lock().unwrap()
-    }
-
-    fn set_latest_id(&self, value: u64){
-        let mut num = self.latest_news.lock().unwrap();
-        *num = value;
-        println!("ID of latest news: {value}");
     }
 
     pub fn get_channels(&self) -> HashSet<u64> {
@@ -119,41 +107,25 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, ctx: Context, _: Ready) {
-        let news_ids = get_news_ids(1);
-        println!("It's alive!");
-        match news_ids.await.get(0) {
-            Some(id) => self.set_latest_id(*id),
-            None => eprintln!("Couldn't get the ID of the latest news")
+        let mut old_news = News::new();
+        if let Some(news) = News::get_news_from_json(self.poll_count).await {
+            old_news = news;
         }
         loop {
             sleep(Duration::from_secs(self.poll_period));
-            let news_ids = get_news_ids(self.poll_count).await;
-            let new_news_count = match news_ids.iter().position(|&i| i == self.get_latest_id()){
-                Some(pos_of_last_news) => {
-                    if pos_of_last_news > 0 { self.set_latest_id(news_ids[0]) }
-                    pos_of_last_news
-                },
-                None => {
-                    if let Some(id) = news_ids.get(0){
-                        self.set_latest_id(*id);
-                    }
-                    self.poll_count as usize
-                }
-            };
-            if new_news_count > 0 {
-                println!("Found {new_news_count} new news");
-            }
-            let news_ids = &news_ids[..new_news_count];
-            for news_id in news_ids.iter().rev(){
-                let url = format!("https://playstartrekonline.com/en/news/article/{news_id}");
-                for channel_id in self.get_channels().iter(){
-                    let channel_id = *channel_id;
-                    let channel = ChannelId(channel_id);
-                    println!("Sending news with ID {news_id} to channel with ID {channel_id}");
-                    if let Err(why) = channel.say(&ctx.http, &url).await {
-                        eprintln!("Error sending message: {why}");
+            if let Some(news) = News::get_news_from_json(self.poll_count).await {
+                let diff = news.get_different_items(&old_news);
+                for item in diff {
+                    for channel_id in self.get_channels().iter(){
+                        let channel_id = *channel_id;
+                        let channel = ChannelId(channel_id);
+                        println!("Sending news with ID {} to channel with ID {}", item.id, channel_id);
+                        if let Err(why) = channel.say(&ctx.http, item.to_string().as_str()).await {
+                            eprintln!("Error sending message: {why}");
+                        }
                     }
                 }
+                old_news = news;
             }
         }
     }
