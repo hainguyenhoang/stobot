@@ -16,6 +16,9 @@ pub fn parse_arg() -> Option<u64> {
 
 #[tokio::main]
 async fn main() {
+    let name = env!("CARGO_PKG_NAME", "");
+    let version = env!("CARGO_PKG_VERSION", "");
+    println!("{name} v{version}");
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
