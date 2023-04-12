@@ -1,5 +1,6 @@
 use std::fmt::{Display, Formatter};
 use serde::Deserialize;
+use serde_aux::prelude::*;
 
 #[derive(Deserialize)]
 pub struct News {
@@ -50,6 +51,7 @@ impl News {
 
 #[derive(Deserialize)]
 pub struct NewsItem {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub id: u64,
     title: String,
     summary: String,
@@ -61,7 +63,11 @@ impl Display for NewsItem {
         let url = format!("https://playstartrekonline.com/en/news/article/{}", self.id);
         let mut platform_str = String::new();
         for platform in &self.platforms {
-            platform_str += format!(":{platform}: ").as_str();
+            let mut platform_to_write = platform.as_str();
+            if platform_to_write == "pc" {
+                platform_to_write = "desktop";
+            }
+            platform_str += format!(":{platform_to_write}: ").as_str();
         }
         write!(f, "**{}**\n{}\n<{}>\n{}", self.title, self.summary, url, platform_str)
     }
