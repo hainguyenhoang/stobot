@@ -2,7 +2,7 @@ version: '3'
 
 services:
   rust:
-    image: rust
+    image: rust:bookworm
     volumes:
       - ./cargo_home:/cargo_home
     environment:
