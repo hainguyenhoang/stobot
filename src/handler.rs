@@ -16,21 +16,21 @@ use crate::news::News;
 pub struct Handler {
     poll_period: u64,
     poll_count: u64,
-    channel_ids: Mutex<HashSet<u64>>
+    channel_ids: Mutex<HashSet<u64>>,
 }
 
-impl Handler{
+impl Handler {
     pub fn new(poll_period: u64, poll_count: u64) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
-            channel_ids: Mutex::new(HashSet::new())
+            channel_ids: Mutex::new(HashSet::new()),
         };
         println!("Reading channels.txt");
-        if let Ok(file) = File::open("channels.txt"){
-            for line in BufReader::new(file).lines(){
-                if let Ok(parsed_line) = line{
-                    if let Ok(parsed_id) = parsed_line.parse::<u64>(){
+        if let Ok(file) = File::open("channels.txt") {
+            for line in BufReader::new(file).lines() {
+                if let Ok(parsed_line) = line {
+                    if let Ok(parsed_id) = parsed_line.parse::<u64>() {
                         handler.add_channel(parsed_id);
                     }
                 }
@@ -38,7 +38,7 @@ impl Handler{
         }
         print!("Channels:");
         let channels = handler.get_channels();
-        for channel in channels.iter(){
+        for channel in channels.iter() {
             print!(" {channel}");
         }
         println!();
@@ -49,20 +49,20 @@ impl Handler{
         self.channel_ids.lock().unwrap().clone()
     }
 
-    fn write_channels_to_file(map: MutexGuard<HashSet<u64>>){
+    fn write_channels_to_file(map: MutexGuard<HashSet<u64>>) {
         let mut file = File::create("channels.txt").expect("Couldn't open channels.txt");
-        for id in map.iter(){
+        for id in map.iter() {
             writeln!(file, "{id}").expect("Couldn't write to channels.txt");
         }
     }
 
-    pub fn add_channel(&self, id: u64){
+    pub fn add_channel(&self, id: u64) {
         let mut map = self.channel_ids.lock().unwrap();
         map.insert(id);
         Handler::write_channels_to_file(map);
     }
 
-    fn remove_channel(&self, id: u64){
+    fn remove_channel(&self, id: u64) {
         let mut map = self.channel_ids.lock().unwrap();
         map.remove(&id);
         Handler::write_channels_to_file(map);
@@ -79,7 +79,7 @@ impl EventHandler for Handler {
                 println!("Registered channel with ID {id}");
                 let mut out_str = String::from("Registered channels:");
                 let registered_channels = self.get_channels();
-                for channel in registered_channels.iter(){
+                for channel in registered_channels.iter() {
                     out_str += format!(" {channel}").as_str();
                 }
                 println!("{out_str}");
@@ -93,7 +93,7 @@ impl EventHandler for Handler {
                 println!("Removed channel with ID {id}");
                 let mut out_str = String::from("Registered channels:");
                 let registered_channels = self.get_channels();
-                for channel in registered_channels.iter(){
+                for channel in registered_channels.iter() {
                     out_str += format!(" {channel}").as_str();
                 }
                 println!("{out_str}");
@@ -116,11 +116,11 @@ impl EventHandler for Handler {
             if let Some(news) = News::get_news_from_json(self.poll_count).await {
                 let diff = news.get_different_items(&old_news);
                 for item in diff {
-                    for channel_id in self.get_channels().iter(){
+                    for channel_id in self.get_channels().iter() {
                         let channel_id = *channel_id;
                         let channel = ChannelId(channel_id);
                         println!("Sending news with ID {} to channel with ID {}", item.id, channel_id);
-                        if let Err(why) = channel.say(&ctx.http, item.to_string().as_str()).await {
+                        if let Err(why) = channel.say(&ctx.http, item.get_msg_str().as_str()).await {
                             eprintln!("Error sending message: {why}");
                         }
                     }

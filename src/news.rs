@@ -1,4 +1,3 @@
-use std::fmt::{Display, Formatter};
 use serde::Deserialize;
 use serde_aux::prelude::*;
 
@@ -58,18 +57,20 @@ pub struct NewsItem {
     platforms: Vec<String>
 }
 
-impl Display for NewsItem {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let url = format!("https://playstartrekonline.com/en/news/article/{}", self.id);
-        let mut platform_str = String::new();
+impl NewsItem {
+    pub fn get_msg_str(&self) -> String {
+        let new_url = format!("https://playstartrekonline.com/en/news/article/{}", self.id);
+        let mut result = format!("**{}**\n{}\n<{}>\n", self.title, self.summary, new_url);
         for platform in &self.platforms {
-            let mut platform_to_write = platform.as_str();
-            if platform_to_write == "pc" {
-                platform_to_write = "desktop";
+            result += "<https://www.arcgames.com/en/games";
+            match platform.as_str() {
+                "ps" => result += "/playstation",
+                "xbox" => result += "/xbox",
+                _ => {}
             }
-            platform_str += format!(":{platform_to_write}: ").as_str();
+            result = format!("{}/star-trek-online/news/detail/{}>\n", result, self.id);
         }
-        write!(f, "**{}**\n{}\n<{}>\n{}", self.title, self.summary, url, platform_str)
+        result
     }
 }
 
