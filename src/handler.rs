@@ -17,17 +17,19 @@ pub struct Handler {
     poll_period: u64,
     poll_count: u64,
     channel_ids: Mutex<HashSet<u64>>,
+    channel_txt_path: String
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
             channel_ids: Mutex::new(HashSet::new()),
+            channel_txt_path
         };
-        println!("Reading channels.txt");
-        if let Ok(file) = File::open("channels.txt") {
+        println!("Reading {}", handler.channel_txt_path);
+        if let Ok(file) = File::open(&handler.channel_txt_path) {
             for line in BufReader::new(file).lines() {
                 if let Ok(parsed_line) = line {
                     if let Ok(parsed_id) = parsed_line.parse::<u64>() {
@@ -49,23 +51,25 @@ impl Handler {
         self.channel_ids.lock().unwrap().clone()
     }
 
-    fn write_channels_to_file(map: MutexGuard<HashSet<u64>>) {
-        let mut file = File::create("channels.txt").expect("Couldn't open channels.txt");
+    fn write_channels_to_file(&self, map: MutexGuard<HashSet<u64>>) {
+        let mut file = File::create(&self.channel_txt_path).expect(format!(
+            "Couldn't open {}", self.channel_txt_path).as_str());
         for id in map.iter() {
-            writeln!(file, "{id}").expect("Couldn't write to channels.txt");
+            writeln!(file, "{id}").expect(format!(
+                "Couldn't write to {}", self.channel_txt_path).as_str());
         }
     }
 
     pub fn add_channel(&self, id: u64) {
         let mut map = self.channel_ids.lock().unwrap();
         map.insert(id);
-        Handler::write_channels_to_file(map);
+        self.write_channels_to_file(map);
     }
 
     fn remove_channel(&self, id: u64) {
         let mut map = self.channel_ids.lock().unwrap();
         map.remove(&id);
-        Handler::write_channels_to_file(map);
+        self.write_channels_to_file(map);
     }
 }
 
