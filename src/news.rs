@@ -1,3 +1,4 @@
+use std::fmt::Debug;
 use serde::Deserialize;
 use serde_aux::prelude::*;
 
@@ -25,6 +26,7 @@ impl News {
 }
 
 #[derive(Deserialize)]
+#[derive(Debug)]
 pub struct NewsItem {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub id: u64,
@@ -34,6 +36,15 @@ pub struct NewsItem {
 }
 
 impl NewsItem {
+    fn from_id(id: u64) -> Self {
+        NewsItem {
+            id,
+            title: "".to_string(),
+            summary: "".to_string(),
+            platforms: vec![],
+        }
+    }
+
     pub fn get_msg_str(&self) -> String {
         let new_url = format!("https://playstartrekonline.com/en/news/article/{}", self.id);
         let mut result = format!("**{}**\n{}\n<{}>\n", self.title, self.summary, new_url);
@@ -53,5 +64,54 @@ impl NewsItem {
 impl PartialEq for NewsItem{
     fn eq(&self, other: &Self) -> bool {
         return self.id == other.id
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use super::*;
+
+    #[test]
+    fn test_different_items(){
+        let mut a = News::new();
+        a.news.push(NewsItem::from_id(4));
+        a.news.push(NewsItem::from_id(3));
+        a.news.push(NewsItem::from_id(2));
+        a.news.push(NewsItem::from_id(1));
+        a.news.push(NewsItem::from_id(0));
+
+        let mut b = News::new();
+        b.news.push(NewsItem::from_id(5));
+        b.news.push(NewsItem::from_id(3));
+        b.news.push(NewsItem::from_id(2));
+        b.news.push(NewsItem::from_id(1));
+        b.news.push(NewsItem::from_id(0));
+
+        let diff = b.get_different_items(&a, 3);
+        assert_eq!(diff.len(), 1);
+        assert_eq!(diff[0].id, 5)
+    }
+
+    #[test]
+    fn test_newsitem_eq() {
+        let a = NewsItem::from_id(1337);
+        let b = NewsItem::from_id(1337);
+        let c = NewsItem::from_id(69420);
+        assert_eq!(a, b);
+        assert_ne!(a, c);
+        assert_ne!(b, c);
+    }
+
+    #[test]
+    fn test_msg_str() {
+        let item = NewsItem {
+            id: 1337,
+            title: "title".to_string(),
+            summary: "summary".to_string(),
+            platforms: vec!["a".to_string(), "ps".to_string(), "xbox".to_string()],
+        };
+        let expected = fs::read_to_string("test_data/msg_str.txt").unwrap();
+        assert_eq!(item.get_msg_str(), expected);
     }
 }
