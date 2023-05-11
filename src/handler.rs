@@ -16,15 +16,17 @@ use crate::news::News;
 pub struct Handler {
     poll_period: u64,
     poll_count: u64,
+    check_count: u64,
     channel_ids: Mutex<HashSet<u64>>,
     channel_txt_path: String
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, check_count:u64, channel_txt_path: String) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
+            check_count,
             channel_ids: Mutex::new(HashSet::new()),
             channel_txt_path
         };
@@ -118,7 +120,7 @@ impl EventHandler for Handler {
         loop {
             sleep(Duration::from_secs(self.poll_period));
             if let Some(news) = News::get_news_from_json(self.poll_count).await {
-                let diff = news.get_different_items(&old_news);
+                let diff = news.get_different_items(&old_news, self.check_count);
                 for item in diff {
                     for channel_id in self.get_channels().iter() {
                         let channel_id = *channel_id;

@@ -37,9 +37,9 @@ impl News {
         }
     }
 
-    pub fn get_different_items(&self, old_news: &Self) -> Vec<&NewsItem> {
+    pub fn get_different_items(&self, old_news: &Self, check_count: u64) -> Vec<&NewsItem> {
         let mut result = vec![];
-        for item in &self.news {
+        for item in &self.news[..check_count as usize] {
             if !old_news.news.contains(item){
                 result.push(item);
             }

@@ -18,8 +18,12 @@ struct Args {
     poll_period: u64,
 
     /// Number of news to poll
-    #[arg(long, default_value_t = 5)]
+    #[arg(long, default_value_t = 10)]
     poll_count: u64,
+
+    /// Number of news to check
+    #[arg(long, default_value_t = 5)]
+    check_count: u64
 }
 
 pub fn parse_u64_arg() -> Option<u64> {
@@ -43,7 +47,8 @@ async fn main() {
     println!("Saved channels path: {}", args.channels_path);
     println!("Polling period: {}", args.poll_period);
     println!("Poll count: {}", args.poll_count);
-    let handler = Handler::new(args.poll_period, args.poll_count, args.channels_path);
+    println!("Check count: {}", args.check_count);
+    let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path);
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");
     if let Err(why) = client.start().await {
