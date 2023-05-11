@@ -2,7 +2,10 @@ version: '3'
 
 services:
   stobot:
-    build: .
+    build:
+      context: .
+      dockerfile: docker/bookworm/Dockerfile
+    image: stobot:bookworm
     environment:
       - DISCORD_TOKEN=<your discord token>
     volumes:
