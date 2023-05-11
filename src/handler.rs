@@ -73,6 +73,30 @@ impl Handler {
         map.remove(&id);
         self.write_channels_to_file(map);
     }
+
+    async fn get_news_json(count: u64) -> Result<String, reqwest::Error> {
+        let url = format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}&field[]=images.img_microsite_background&field[]=platforms");
+        let response = reqwest::get(url).await?;
+        Ok(response.text().await?)
+    }
+
+    async fn get_news_from_json(count: u64) -> Option<News> {
+        match Self::get_news_json(count).await {
+            Ok(text) => {
+                match serde_json::from_str::<News>(text.as_str()) {
+                    Ok(item) => Some(item),
+                    Err(why) => {
+                        eprintln!("Error while getting the news json: {why}");
+                        None
+                    }
+                }
+            }
+            Err(why) => {
+                eprintln!("Error while getting the news json: {why}");
+                None
+            }
+        }
+    }
 }
 
 #[async_trait]
@@ -114,12 +138,12 @@ impl EventHandler for Handler {
 
     async fn ready(&self, ctx: Context, _: Ready) {
         let mut old_news = News::new();
-        if let Some(news) = News::get_news_from_json(self.poll_count).await {
+        if let Some(news) = Self::get_news_from_json(self.poll_count).await {
             old_news = news;
         }
         loop {
             sleep(Duration::from_secs(self.poll_period));
-            if let Some(news) = News::get_news_from_json(self.poll_count).await {
+            if let Some(news) = Self::get_news_from_json(self.poll_count).await {
                 let diff = news.get_different_items(&old_news, self.check_count);
                 for item in diff {
                     for channel_id in self.get_channels().iter() {

@@ -13,30 +13,6 @@ impl News {
         }
     }
 
-    async fn get_news_json(count: u64) -> Result<String, reqwest::Error> {
-        let url = format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}&field[]=images.img_microsite_background&field[]=platforms");
-        let response = reqwest::get(url).await?;
-        Ok(response.text().await?)
-    }
-
-    pub async fn get_news_from_json(count: u64) -> Option<Self> {
-        match Self::get_news_json(count).await {
-            Ok(text) => {
-                match serde_json::from_str::<Self>(text.as_str()) {
-                    Ok(item) => Some(item),
-                    Err(why) => {
-                        eprintln!("Error while getting the news json: {why}");
-                        None
-                    }
-                }
-            }
-            Err(why) => {
-                eprintln!("Error while getting the news json: {why}");
-                None
-            }
-        }
-    }
-
     pub fn get_different_items(&self, old_news: &Self, check_count: u64) -> Vec<&NewsItem> {
         let mut result = vec![];
         for item in &self.news[..check_count as usize] {
