@@ -36,15 +36,6 @@ pub struct NewsItem {
 }
 
 impl NewsItem {
-    fn from_id(id: u64) -> Self {
-        NewsItem {
-            id,
-            title: "".to_string(),
-            summary: "".to_string(),
-            platforms: vec![],
-        }
-    }
-
     pub fn get_msg_str(&self) -> String {
         let new_url = format!("https://playstartrekonline.com/en/news/article/{}", self.id);
         let mut result = format!("**{}**\n{}\n<{}>\n", self.title, self.summary, new_url);
@@ -72,21 +63,30 @@ mod tests {
     use std::fs;
     use super::*;
 
+    fn news_item_from_id(id: u64) -> NewsItem {
+        NewsItem {
+            id,
+            title: "".to_string(),
+            summary: "".to_string(),
+            platforms: vec![],
+        }
+    }
+    
     #[test]
     fn test_different_items(){
         let mut a = News::new();
-        a.news.push(NewsItem::from_id(4));
-        a.news.push(NewsItem::from_id(3));
-        a.news.push(NewsItem::from_id(2));
-        a.news.push(NewsItem::from_id(1));
-        a.news.push(NewsItem::from_id(0));
+        a.news.push(news_item_from_id(4));
+        a.news.push(news_item_from_id(3));
+        a.news.push(news_item_from_id(2));
+        a.news.push(news_item_from_id(1));
+        a.news.push(news_item_from_id(0));
 
         let mut b = News::new();
-        b.news.push(NewsItem::from_id(5));
-        b.news.push(NewsItem::from_id(3));
-        b.news.push(NewsItem::from_id(2));
-        b.news.push(NewsItem::from_id(1));
-        b.news.push(NewsItem::from_id(0));
+        b.news.push(news_item_from_id(5));
+        b.news.push(news_item_from_id(3));
+        b.news.push(news_item_from_id(2));
+        b.news.push(news_item_from_id(1));
+        b.news.push(news_item_from_id(0));
 
         let diff = b.get_different_items(&a, 3);
         assert_eq!(diff.len(), 1);
@@ -95,9 +95,9 @@ mod tests {
 
     #[test]
     fn test_newsitem_eq() {
-        let a = NewsItem::from_id(1337);
-        let b = NewsItem::from_id(1337);
-        let c = NewsItem::from_id(69420);
+        let a = news_item_from_id(1337);
+        let b = news_item_from_id(1337);
+        let c = news_item_from_id(69420);
         assert_eq!(a, b);
         assert_ne!(a, c);
         assert_ne!(b, c);
