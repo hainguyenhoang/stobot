@@ -7,7 +7,6 @@ use serenity::prelude::*;
 use crate::handler::Handler;
 
 #[derive(Parser)]
-#[command(author, version, about, long_about = None)]
 struct Args {
     /// Path to saved channels
     #[arg(short, long, default_value = "channels.txt")]
@@ -17,11 +16,11 @@ struct Args {
     #[arg(long, default_value_t = 10)]
     poll_period: u64,
 
-    /// Number of news to poll
+    /// Number of news to poll in each period and to save for the check during the next poll period
     #[arg(long, default_value_t = 10)]
     poll_count: u64,
 
-    /// Number of news to check
+    /// How many new news to check compared to all of the previous poll's news, must not be larger than --poll-count
     #[arg(long, default_value_t = 5)]
     check_count: u64
 }
@@ -47,6 +46,9 @@ async fn main() {
     println!("Polling period: {}", args.poll_period);
     println!("Poll count: {}", args.poll_count);
     println!("Check count: {}", args.check_count);
+    if args.check_count > args.poll_count {
+        panic!("--check-count is larger than --poll-count!");
+    }
     let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path);
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let mut client =
