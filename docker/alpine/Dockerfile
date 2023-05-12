@@ -1,6 +1,6 @@
 FROM rust:alpine3.17 as builder
-ENV RUST_BACKTRACE=1
-RUN apk add --no-cache musl-dev pkgconfig openssl-dev perl make
+ENV RUST_BACKTRACE=full
+RUN apk add --no-cache musl-dev perl make
 WORKDIR /usr/src/stobot
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
