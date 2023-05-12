@@ -40,7 +40,6 @@ async fn main() {
     let name = env!("CARGO_PKG_NAME", "");
     let version = env!("CARGO_PKG_VERSION", "");
     println!("{name} v{version}");
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::MESSAGE_CONTENT;
     let args = Args::parse();
@@ -49,6 +48,7 @@ async fn main() {
     println!("Poll count: {}", args.poll_count);
     println!("Check count: {}", args.check_count);
     let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path);
+    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");
     if let Err(why) = client.start().await {
