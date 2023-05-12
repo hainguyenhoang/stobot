@@ -10,5 +10,4 @@ services:
       - DISCORD_TOKEN=<your discord token>
     volumes:
       - <path to channels txt folder>:/stobot
-    command:
-      - -c /stobot/channels.txt
+    command: -c /stobot/channels.txt
