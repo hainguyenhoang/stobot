@@ -7,10 +7,20 @@ license = "GPL-3.0-or-later"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "4.2", features = ["derive"] }
+reqwest = "0.11"
 serde = "1.0"
 serde-aux = "4.2"
 serde_json = "1.0"
-reqwest = "0.11"
-serenity = { version = "0.11", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "cache", "http"] }
-tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+
+[dependencies.clap]
+version = "4.2"
+features = ["derive"]
+
+[dependencies.serenity]
+version = "0.11"
+default-features = false
+features = ["client", "gateway", "rustls_backend", "model", "cache", "http"]
+
+[dependencies.tokio]
+version = "1.0"
+features = ["macros", "rt-multi-thread"]

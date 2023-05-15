@@ -6,7 +6,7 @@ WORKDIR /usr/src/stobot
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
     --mount=type=cache,target=/usr/src/stobot/target,id=alpine_target \
-    ls && cargo install --path .
+    cargo install --path .
 
 FROM alpine:3.17
 RUN apk add --no-cache libgcc
