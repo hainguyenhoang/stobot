@@ -1,7 +1,7 @@
 FROM rust:bookworm as builder
 ENV RUST_BACKTRACE=full
 WORKDIR /usr/src/stobot
-COPY . .
+COPY docker/bookworm .
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
     --mount=type=cache,target=/usr/src/stobot/target,id=bookworm_target \
     cargo install --path .
