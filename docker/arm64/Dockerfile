@@ -1,0 +1,17 @@
+FROM rust:bookworm as builder
+ENV RUST_BACKTRACE=full
+ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/aarch64-linux-gnu-gcc
+RUN apt-get update
+RUN apt-get install -y gcc-aarch64-linux-gnu
+RUN rustup target add aarch64-unknown-linux-gnu
+RUN rustup toolchain install stable-aarch64-unknown-linux-gnu
+WORKDIR /usr/src/stobot
+COPY . .
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
+    --mount=type=cache,target=/usr/src/stobot/target,id=arm64_target \
+    cargo install --path . --target=aarch64-unknown-linux-gnu
+
+FROM arm64v8/debian:bookworm-slim
+RUN apt-get update && apt-get install -y libssl3 ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /usr/local/cargo/bin/stobot /usr/local/bin/stobot
+ENTRYPOINT ["stobot"]
