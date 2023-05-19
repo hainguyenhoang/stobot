@@ -23,6 +23,10 @@ impl News {
         }
         result
     }
+
+    pub fn count(&self) -> u64 {
+        self.news.len() as u64
+    }
 }
 
 #[derive(Deserialize)]

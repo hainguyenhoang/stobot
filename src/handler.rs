@@ -84,7 +84,14 @@ impl Handler {
         match Self::get_news_json(count).await {
             Ok(text) => {
                 match serde_json::from_str::<News>(text.as_str()) {
-                    Ok(item) => Some(item),
+                    Ok(item) => {
+                        if item.count() == count {
+                            Some(item)
+                        } else {
+                            eprintln!("Expected {} news, got {} instead", count, item.count());
+                            None
+                        }
+                    }
                     Err(why) => {
                         eprintln!("Error while getting the news json: {why}");
                         None
