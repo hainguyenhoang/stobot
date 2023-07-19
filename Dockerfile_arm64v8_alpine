@@ -1,0 +1,15 @@
+FROM docker.io/rust:alpine3.18 as builder
+ENV RUST_BACKTRACE=full
+# TODO: add the cross compiler to builder
+ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc
+RUN apk add musl-dev make perl
+RUN rustup target add aarch64-unknown-linux-musl
+WORKDIR /usr/src/stobot
+COPY . .
+RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
+    --mount=type=cache,target=/usr/src/stobot/target,id=arm64v8_alpine_target \
+    cargo install --path . --target=aarch64-unknown-linux-musl
+
+FROM docker.io/arm64v8/alpine:3.18
+COPY --from=builder /usr/local/cargo/bin/stobot /usr/local/bin/stobot
+ENTRYPOINT ["stobot"]

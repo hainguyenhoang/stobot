@@ -1,6 +1,6 @@
 FROM docker.io/rust:bookworm as builder
 ENV RUST_BACKTRACE=full
-ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=/usr/bin/aarch64-linux-gnu-gcc
+ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc
 RUN apt-get update
 RUN apt-get install -y gcc-aarch64-linux-gnu
 RUN rustup target add aarch64-unknown-linux-gnu
