@@ -1,4 +1,4 @@
-FROM rust:alpine3.17 as builder
+FROM docker.io/rust:alpine3.18 as builder
 ENV RUST_BACKTRACE=full
 RUN apk add musl-dev make perl
 WORKDIR /usr/src/stobot
@@ -7,6 +7,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
     --mount=type=cache,target=/usr/src/stobot/target,id=host_alpine_target \
     cargo install --path .
 
-FROM alpine:3.17
+FROM docker.io/alpine:3.18
 COPY --from=builder /usr/local/cargo/bin/stobot /usr/local/bin/stobot
 ENTRYPOINT ["stobot"]
