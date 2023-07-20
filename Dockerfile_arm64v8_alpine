@@ -1,8 +1,10 @@
-FROM docker.io/rust:alpine3.18 as builder
+FROM docker.io/dockcross/linux-arm64-musl as builder
 ENV RUST_BACKTRACE=full
-# TODO: add the cross compiler to builder
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=/usr/local/cargo/bin:$PATH
 ENV CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-musl-gcc
-RUN apk add musl-dev make perl
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 RUN rustup target add aarch64-unknown-linux-musl
 WORKDIR /usr/src/stobot
 COPY . .
