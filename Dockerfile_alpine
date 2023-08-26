@@ -1,6 +1,7 @@
 FROM docker.io/rust:alpine3.18 as builder
 ENV RUST_BACKTRACE=full
-RUN apk add musl-dev make perl
+ENV RUSTFLAGS="-C target-feature=-crt-static"
+RUN apk add musl-dev openssl-dev
 WORKDIR /usr/src/stobot
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
@@ -8,5 +9,6 @@ RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
     cargo install --path .
 
 FROM docker.io/alpine:3.18
+RUN apk add --no-cache libgcc
 COPY --from=builder /usr/local/cargo/bin/stobot /usr/local/bin/stobot
 ENTRYPOINT ["stobot"]
