@@ -53,7 +53,7 @@ async fn main() {
     if args.check_count > args.poll_count {
         panic!("--check-count is larger than --poll-count!");
     }
-    let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path);
+    let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path, args.platforms);
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");
