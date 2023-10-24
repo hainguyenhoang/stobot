@@ -22,7 +22,11 @@ struct Args {
 
     /// How many new news to check compared to all of the previous poll's news, must not be larger than --poll-count
     #[arg(long, default_value_t = 5)]
-    check_count: u64
+    check_count: u64,
+
+    /// Filter news from these platforms
+    #[arg()]
+    platforms: Vec<String>
 }
 
 pub fn parse_u64_arg() -> Option<u64> {
