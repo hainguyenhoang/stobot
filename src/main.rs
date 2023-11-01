@@ -18,11 +18,11 @@ struct Args {
     poll_period: u64,
 
     /// Number of news to poll in each period and to save for the check during the next poll period
-    #[arg(long, default_value_t = 10)]
+    #[arg(long, default_value_t = 20)]
     poll_count: u64,
 
     /// How many new news to check compared to all of the previous poll's news, must not be larger than --poll-count
-    #[arg(long, default_value_t = 5)]
+    #[arg(long, default_value_t = 10)]
     check_count: u64,
 
     /// Filter news from these platforms
