@@ -10,7 +10,7 @@ WORKDIR /usr/src/stobot
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry,id=registry \
     --mount=type=cache,target=/usr/src/stobot/target,id=arm64v8_alpine_target \
-    cargo install --path . --target=aarch64-unknown-linux-musl
+    cargo update && cargo install --path . --target=aarch64-unknown-linux-musl
 
 FROM docker.io/arm64v8/alpine:3.18
 COPY --from=builder /usr/local/cargo/bin/stobot /usr/local/bin/stobot
