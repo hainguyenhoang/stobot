@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeSet, HashSet};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::sync::{Mutex, MutexGuard};
@@ -18,11 +18,11 @@ pub struct Handler {
     check_count: u64,
     channel_ids: Mutex<HashSet<u64>>,
     channel_txt_path: String,
-    platforms: Vec<String>
+    platforms: BTreeSet<String>
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64, check_count:u64, channel_txt_path: String, platforms: Vec<String>) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, check_count:u64, channel_txt_path: String, platforms: BTreeSet<String>) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,

@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::fmt::Debug;
 use serde::Deserialize;
 use serde_aux::prelude::*;
@@ -36,7 +37,7 @@ pub struct NewsItem {
     pub id: u64,
     title: String,
     summary: String,
-    platforms: Vec<String>
+    platforms: BTreeSet<String>
 }
 
 impl NewsItem {
