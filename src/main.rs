@@ -25,6 +25,10 @@ struct Args {
     #[arg(long, default_value_t = 10)]
     check_count: u64,
 
+    /// At start, print out up to 10 of the latest matching news after poll_period
+    #[arg(long)]
+    debug: bool,
+
     /// Filter news from these platforms
     #[arg()]
     platforms: Vec<String>
@@ -55,7 +59,10 @@ async fn main() {
         panic!("--check-count is larger than --poll-count!");
     }
     let platforms = BTreeSet::from_iter(args.platforms);
-    let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path, platforms);
+    for platform in &platforms {
+        println!("Platform: {}", platform);
+    }
+    let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path, platforms, args.debug);
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");
