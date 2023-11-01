@@ -2,9 +2,8 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::sync::{Mutex, MutexGuard};
-use std::thread::sleep;
 use std::time::Duration;
-
+use async_std::task;
 use serenity::async_trait;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
@@ -151,7 +150,7 @@ impl EventHandler for Handler {
             old_news = news;
         }
         loop {
-            sleep(Duration::from_secs(self.poll_period));
+            task::sleep(Duration::from_secs(self.poll_period)).await;
             if let Some(news) = Self::get_news_from_json(self.poll_count).await {
                 let diff = news.get_different_items(&old_news, self.check_count);
                 for item in diff {
