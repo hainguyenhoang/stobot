@@ -1,20 +1,20 @@
 [package]
 name = "stobot"
-version = "0.5.1"
+version = "0.6.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = "0.11.22"
-serde = "1.0.188"
-serde-aux = "4.2.0"
-serde_json = "1.0.107"
-async-std = "1.12.0"
+reqwest = "~0.11"
+serde = "~1.0"
+serde-aux = "~4.2"
+serde_json = "~1.0"
+async-std = "~1.12"
 
 [dependencies.clap]
-version = "4.4.6"
+version = "~4.4"
 features = ["derive"]
 
 #[dependencies.openssl]
@@ -22,10 +22,10 @@ features = ["derive"]
 #features = ["vendored"]
 
 [dependencies.serenity]
-version = "0.11.6"
+version = "~0.11"
 default-features = false
 features = ["client", "gateway", "rustls_backend", "model", "cache", "http"]
 
 [dependencies.tokio]
-version = "1.33.0"
+version = "~1.33"
 features = ["macros", "rt-multi-thread"]
