@@ -152,7 +152,7 @@ impl EventHandler for Handler {
         loop {
             task::sleep(Duration::from_secs(self.poll_period)).await;
             if let Some(news) = Self::get_news_from_json(self.poll_count).await {
-                let diff = news.get_different_items(&old_news, self.check_count);
+                let diff = news.get_different_items(&old_news, self.check_count, &self.platforms);
                 for item in diff {
                     for channel_id in self.get_channels().iter() {
                         let channel_id = *channel_id;
