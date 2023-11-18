@@ -25,6 +25,16 @@ impl News {
         result
     }
 
+    pub fn get_news_with_platform(&self, platforms: &BTreeSet<String>) -> Vec<&NewsItem> {
+        let mut result = vec![];
+        for item in &self.news {
+            if !platforms.is_disjoint(&item.platforms){
+                result.push(item);
+            }
+        }
+        result
+    }
+
     pub fn count(&self) -> u64 {
         self.news.len() as u64
     }
