@@ -16,23 +16,19 @@ use crate::news::News;
 pub struct Handler {
     poll_period: u64,
     poll_count: u64,
-    check_count: u64,
     channel_ids: Mutex<HashSet<u64>>,
     channel_txt_path: String,
     platforms: BTreeSet<String>,
-    debug: bool
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64, check_count:u64, channel_txt_path: String, platforms: BTreeSet<String>, debug: bool) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, platforms: BTreeSet<String>) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
-            check_count,
             channel_ids: Mutex::new(HashSet::new()),
             channel_txt_path,
-            platforms,
-            debug
+            platforms
         };
         println!("Reading {}", handler.channel_txt_path);
         if let Ok(file) = File::open(&handler.channel_txt_path) {

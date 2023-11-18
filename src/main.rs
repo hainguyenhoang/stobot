@@ -17,17 +17,9 @@ struct Args {
     #[arg(long, default_value_t = 10)]
     poll_period: u64,
 
-    /// Number of news to poll in each period and to save for the check during the next poll period
+    /// Number of news to poll in each period
     #[arg(long, default_value_t = 20)]
     poll_count: u64,
-
-    /// How many new news to check compared to all of the previous poll's news, must not be larger than --poll-count
-    #[arg(long, default_value_t = 10)]
-    check_count: u64,
-
-    /// At start, print out up to 10 of the latest matching news after poll_period
-    #[arg(long)]
-    debug: bool,
 
     /// Filter news from these platforms
     #[arg()]
@@ -54,15 +46,11 @@ async fn main() {
     println!("Saved channels path: {}", args.channels_path);
     println!("Polling period: {}", args.poll_period);
     println!("Poll count: {}", args.poll_count);
-    println!("Check count: {}", args.check_count);
-    if args.check_count > args.poll_count {
-        panic!("--check-count is larger than --poll-count!");
-    }
     let platforms = BTreeSet::from_iter(args.platforms);
     for platform in &platforms {
         println!("Platform: {}", platform);
     }
-    let handler = Handler::new(args.poll_period, args.poll_count, args.check_count, args.channels_path, platforms, args.debug);
+    let handler = Handler::new(args.poll_period, args.poll_count, args.channels_path, platforms);
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");

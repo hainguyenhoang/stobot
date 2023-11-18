@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 use std::fmt::Debug;
 use std::slice::Iter;
-use std::vec;
 use serde::Deserialize;
 use serde_aux::prelude::*;
 
@@ -11,30 +10,6 @@ pub struct News {
 }
 
 impl News {
-    pub fn new() -> Self {
-        News {
-            news: Vec::new()
-        }
-    }
-
-    pub fn get_news(&self) -> Vec<&NewsItem> {
-        let mut result: Vec<&NewsItem> = vec![];
-        for item in &self.news {
-            result.push(item);
-        }
-        result
-    }
-
-    pub fn get_different_items(&self, old_news: &Self, check_count: u64, platforms: &BTreeSet<String>) -> Vec<&NewsItem> {
-        let mut result = vec![];
-        for item in &self.news[..check_count as usize] {
-            if !old_news.news.contains(item) && !platforms.is_disjoint(&item.platforms){
-                result.push(item);
-            }
-        }
-        result
-    }
-
     pub fn filter_news_by_platform(&mut self, platforms: &BTreeSet<String>) {
         self.news.retain(|item| !platforms.is_disjoint(&item.platforms));
     }
@@ -56,7 +31,7 @@ pub struct NewsItem {
     title: String,
     summary: String,
     platforms: BTreeSet<String>,
-    updated: String
+    //updated: String
 }
 
 impl NewsItem {
