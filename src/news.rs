@@ -1,5 +1,7 @@
 use std::collections::BTreeSet;
 use std::fmt::Debug;
+use std::slice::Iter;
+use std::vec;
 use serde::Deserialize;
 use serde_aux::prelude::*;
 
@@ -33,18 +35,16 @@ impl News {
         result
     }
 
-    pub fn get_news_with_platform(&self, platforms: &BTreeSet<String>) -> Vec<&NewsItem> {
-        let mut result = vec![];
-        for item in &self.news {
-            if !platforms.is_disjoint(&item.platforms){
-                result.push(item);
-            }
-        }
-        result
+    pub fn filter_news_by_platform(&mut self, platforms: &BTreeSet<String>) {
+        self.news.retain(|item| !platforms.is_disjoint(&item.platforms));
     }
 
     pub fn count(&self) -> u64 {
         self.news.len() as u64
+    }
+
+    pub fn iter(&self) -> Iter<NewsItem> {
+        return self.news.iter();
     }
 }
 
@@ -52,7 +52,7 @@ impl News {
 #[derive(Debug)]
 pub struct NewsItem {
     #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub id: u64,
+    id: u64,
     title: String,
     summary: String,
     platforms: BTreeSet<String>,
@@ -60,6 +60,10 @@ pub struct NewsItem {
 }
 
 impl NewsItem {
+    pub fn get_id(&self) -> u64 {
+        self.id
+    }
+
     pub fn get_msg_str(&self) -> String {
         let new_url = format!("https://playstartrekonline.com/en/news/article/{}", self.id);
         let mut result = format!("**{}**\n{}\n<{}>\n", self.title, self.summary, new_url);

@@ -111,18 +111,12 @@ impl Handler {
 
     fn get_ids_from_messages(messages: &Vec<Message>) -> Vec<u64> {
         let mut result: Vec<u64> = vec![];
-        let re = Regex::new(r"\d+\n*$").unwrap();
+        let re = Regex::new(r"\d+>\n*").unwrap();
+        let re2 = Regex::new(r"\d+").unwrap();
         for m in messages{
-            let capture_result = re.captures(m.content.as_str());
-            match capture_result {
-                Some(capture) => {
-                    let parse_result = capture[0].parse::<u64>();
-                    match parse_result {
-                        Ok(id) => result.push(id),
-                        Err(why) => eprintln!("Could not convert to u64: {why}")
-                    }
-                }
-                None => eprintln!("ID not found in message content {}", m.content)
+            if let Some(capture) = re.captures(m.content.as_str()) {
+                let new_capture = re2.captures(&capture[0]).unwrap();
+                result.push(new_capture[0].parse::<u64>().unwrap());
             }
         }
         result
@@ -167,28 +161,28 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, ctx: Context, _: Ready) {
-        let mut old_news = News::new();
-        if let Some(news) = Self::get_news_from_json(self.poll_count).await {
-            if !self.debug{
-                old_news = news;
-            }
-        }
         loop {
-            task::sleep(Duration::from_secs(self.poll_period)).await;
-            if let Some(news) = Self::get_news_from_json(self.poll_count).await {
-                let diff = news.get_different_items(&old_news, self.check_count, &self.platforms);
-                for item in diff {
-                    for channel_id in self.get_channels().iter() {
-                        let channel_id = *channel_id;
-                        let channel = ChannelId(channel_id);
-                        println!("Sending news with ID {} to channel with ID {}", item.id, channel_id);
-                        if let Err(why) = channel.say(&ctx.http, item.get_msg_str().as_str()).await {
-                            eprintln!("Error sending message: {why}");
+            if let Some(mut news) = Self::get_news_from_json(self.poll_count).await {
+                news.filter_news_by_platform(&self.platforms);
+                for channel_id in self.get_channels().iter() {
+                    let channel = ChannelId(*channel_id);
+                    match channel.messages(&ctx.http, |b| b).await {
+                        Ok(existing_messages) => {
+                            let existing_ids = Self::get_ids_from_messages(&existing_messages);
+                            for item in news.iter() {
+                                if !existing_ids.contains(&item.get_id()){
+                                    println!("Sending news with ID {} to channel with ID {}", item.get_id(), *channel_id);
+                                    if let Err(why) = channel.say(&ctx.http, item.get_msg_str().as_str()).await {
+                                        eprintln!("Error sending message: {why}");
+                                    }
+                                }
+                            }
                         }
+                        Err(why) => eprintln!("Error reading existing messages: {why}")
                     }
                 }
-                old_news = news;
             }
+            task::sleep(Duration::from_secs(self.poll_period)).await;
         }
     }
 }
