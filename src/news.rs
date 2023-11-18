@@ -37,7 +37,8 @@ pub struct NewsItem {
     pub id: u64,
     title: String,
     summary: String,
-    platforms: BTreeSet<String>
+    platforms: BTreeSet<String>,
+    updated: String
 }
 
 impl NewsItem {

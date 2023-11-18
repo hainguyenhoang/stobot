@@ -78,7 +78,7 @@ impl Handler {
     }
 
     async fn get_news_json(count: u64) -> Result<String, reqwest::Error> {
-        let url = format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}&field[]=platforms");
+        let url = format!("https://api.arcgames.com/v1.0/games/sto/news?limit={count}&field[]=platforms&field[]=updated");
         let response = reqwest::get(url).await?;
         Ok(response.text().await?)
     }
