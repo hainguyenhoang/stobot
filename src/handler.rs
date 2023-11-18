@@ -9,6 +9,7 @@ use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::id::ChannelId;
 use serenity::prelude::*;
+use regex::Regex;
 
 use crate::news::News;
 
@@ -106,6 +107,25 @@ impl Handler {
                 None
             }
         }
+    }
+
+    fn get_ids_from_messages(messages: &Vec<Message>) -> Vec<u64> {
+        let mut result: Vec<u64> = vec![];
+        let re = Regex::new(r"\d+\n*$").unwrap();
+        for m in messages{
+            let capture_result = re.captures(m.content.as_str());
+            match capture_result {
+                Some(capture) => {
+                    let parse_result = capture[0].parse::<u64>();
+                    match parse_result {
+                        Ok(id) => result.push(id),
+                        Err(why) => eprintln!("Could not convert to u64: {why}")
+                    }
+                }
+                None => eprintln!("ID not found in message content {}", m.content)
+            }
+        }
+        result
     }
 }
 
