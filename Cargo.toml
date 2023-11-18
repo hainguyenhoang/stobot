@@ -1,6 +1,6 @@
 [package]
 name = "stobot"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 license = "GPL-3.0-or-later"
 
@@ -28,5 +28,5 @@ default-features = false
 features = ["client", "gateway", "rustls_backend", "model", "cache", "http"]
 
 [dependencies.tokio]
-version = "1.34.0"
+version = "~1.34"
 features = ["macros", "rt-multi-thread"]
