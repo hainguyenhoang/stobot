@@ -3,6 +3,9 @@ use std::fmt::Debug;
 use std::slice::Iter;
 use serde::Deserialize;
 use serde_aux::prelude::*;
+use chrono::{NaiveDateTime, TimeZone, Utc};
+use chrono::LocalResult::*;
+use chrono_tz::America::Los_Angeles;
 
 #[derive(Deserialize)]
 pub struct News {
@@ -31,7 +34,7 @@ pub struct NewsItem {
     title: String,
     summary: String,
     platforms: BTreeSet<String>,
-    //updated: String
+    updated: String
 }
 
 impl NewsItem {
@@ -52,6 +55,21 @@ impl NewsItem {
             result = format!("{}/star-trek-online/news/detail/{}>\n", result, self.id);
         }
         result
+    }
+
+    pub fn is_fresh(&self, diff_threshold: u64) -> bool {
+        if let Ok(naive) = NaiveDateTime::parse_from_str(&self.updated, "%Y-%m-%d %H:%M:%S") {
+            if let Single(pacific) = Los_Angeles.from_local_datetime(&naive) {
+                let diff = Utc::now().signed_duration_since(pacific);
+                return diff.num_seconds().abs() as u64 <= diff_threshold;
+            }
+            else {
+                false
+            }
+        }
+        else {
+            false
+        }
     }
 }
 
