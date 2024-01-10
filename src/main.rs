@@ -29,7 +29,7 @@ struct Args {
     #[arg(short, long, default_value_t = 50)]
     msg_count: u64,
 
-    /// Filter news from these platforms
+    /// Space separated list of platforms to filter news from. E.g.: to have news from all 3: `pc ps xbox`
     #[arg()]
     platforms: Vec<String>
 }
