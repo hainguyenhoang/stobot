@@ -25,6 +25,10 @@ struct Args {
     #[arg(short, long, default_value_t = 120)]
     fresh_seconds: u64,
 
+    /// Amount of Discord messages to check for already posted news items during each poll. Discord has a limitation of 100.
+    #[arg(short, long, default_value_t = 50)]
+    msg_count: u64,
+
     /// Filter news from these platforms
     #[arg()]
     platforms: Vec<String>
@@ -50,11 +54,13 @@ async fn main() {
     println!("Saved channels path: {}", args.channels_path);
     println!("Polling period: {}", args.poll_period);
     println!("Poll count: {}", args.poll_count);
+    println!("Fresh seconds: {}", args.fresh_seconds);
+    println!("Messages to check: {}", args.msg_count);
     let platforms = BTreeSet::from_iter(args.platforms);
     for platform in &platforms {
         println!("Platform: {}", platform);
     }
-    let handler = Handler::new(args.poll_period, args.poll_count, args.channels_path, args.fresh_seconds, platforms);
+    let handler = Handler::new(args.poll_period, args.poll_count, args.channels_path, args.fresh_seconds, args.msg_count, platforms);
     let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN environment variable is unset!");
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");

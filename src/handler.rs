@@ -19,17 +19,19 @@ pub struct Handler {
     channel_ids: Mutex<HashSet<u64>>,
     channel_txt_path: String,
     fresh_seconds: u64,
+    msg_count: u64,
     platforms: BTreeSet<String>,
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, fresh_seconds: u64, platforms: BTreeSet<String>) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, fresh_seconds: u64, msg_count: u64, platforms: BTreeSet<String>) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
             channel_ids: Mutex::new(HashSet::new()),
             channel_txt_path,
             fresh_seconds,
+            msg_count,
             platforms
         };
         println!("Reading {}", handler.channel_txt_path);
@@ -164,7 +166,7 @@ impl EventHandler for Handler {
                 news.filter_news_by_platform(&self.platforms);
                 for channel_id in self.get_channels().iter() {
                     let channel = ChannelId(*channel_id);
-                    match channel.messages(&ctx.http, |b| b).await {
+                    match channel.messages(&ctx.http, |b| b.limit(self.msg_count)).await {
                         Ok(existing_messages) => {
                             let existing_ids = Self::get_ids_from_messages(&existing_messages);
                             for item in news.iter() {
