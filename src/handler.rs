@@ -18,16 +18,18 @@ pub struct Handler {
     poll_count: u64,
     channel_ids: Mutex<HashSet<u64>>,
     channel_txt_path: String,
+    fresh_seconds: u64,
     platforms: BTreeSet<String>,
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, platforms: BTreeSet<String>) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, fresh_seconds: u64, platforms: BTreeSet<String>) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
             channel_ids: Mutex::new(HashSet::new()),
             channel_txt_path,
+            fresh_seconds,
             platforms
         };
         println!("Reading {}", handler.channel_txt_path);
@@ -166,7 +168,7 @@ impl EventHandler for Handler {
                         Ok(existing_messages) => {
                             let existing_ids = Self::get_ids_from_messages(&existing_messages);
                             for item in news.iter() {
-                                if !existing_ids.contains(&item.get_id()){
+                                if !existing_ids.contains(&item.get_id()) && item.is_fresh(self.fresh_seconds){
                                     println!("Sending news with ID {} to channel with ID {}", item.get_id(), *channel_id);
                                     if let Err(why) = channel.say(&ctx.http, item.get_msg_str().as_str()).await {
                                         eprintln!("Error sending message: {why}");

@@ -21,6 +21,10 @@ struct Args {
     #[arg(long, default_value_t = 20)]
     poll_count: u64,
 
+    /// Maximum time difference in seconds between now and timestamp of news item to be even considered for posting
+    #[arg(short, long, default_value_t = 120)]
+    fresh_seconds: u64,
+
     /// Filter news from these platforms
     #[arg()]
     platforms: Vec<String>
