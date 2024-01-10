@@ -54,8 +54,8 @@ async fn main() {
     for platform in &platforms {
         println!("Platform: {}", platform);
     }
-    let handler = Handler::new(args.poll_period, args.poll_count, args.channels_path, platforms);
-    let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+    let handler = Handler::new(args.poll_period, args.poll_count, args.channels_path, args.fresh_seconds, platforms);
+    let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN environment variable is unset!");
     let mut client =
         Client::builder(&token, intents).event_handler(handler).await.expect("Err creating client");
     if let Err(why) = client.start().await {
