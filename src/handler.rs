@@ -5,6 +5,7 @@ use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
 use async_std::task;
 use serenity::async_trait;
+use serenity::builder::GetMessages;
 use serenity::model::channel::Message;
 use serenity::model::gateway::Ready;
 use serenity::model::id::ChannelId;
@@ -19,12 +20,12 @@ pub struct Handler {
     channel_ids: Mutex<HashSet<u64>>,
     channel_txt_path: String,
     fresh_seconds: u64,
-    msg_count: u64,
+    msg_count: u8,
     platforms: BTreeSet<String>,
 }
 
 impl Handler {
-    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, fresh_seconds: u64, msg_count: u64, platforms: BTreeSet<String>) -> Handler {
+    pub fn new(poll_period: u64, poll_count: u64, channel_txt_path: String, fresh_seconds: u64, msg_count: u8, platforms: BTreeSet<String>) -> Handler {
         let handler = Handler {
             poll_period,
             poll_count,
@@ -126,7 +127,7 @@ impl Handler {
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        let id = msg.channel_id.0;
+        let id = msg.channel_id.get();
         match msg.content.as_str() {
             "!stobot" => {
                 self.add_channel(id);
@@ -165,8 +166,9 @@ impl EventHandler for Handler {
             if let Some(mut news) = Self::get_news_from_json(self.poll_count).await {
                 if news.filter_news_by_platform(&self.platforms) {
                     for channel_id in self.get_channels().iter() {
-                        let channel = ChannelId(*channel_id);
-                        match channel.messages(&ctx.http, |b| b.limit(self.msg_count)).await {
+                        let channel = ChannelId::new(*channel_id);
+                        let builder = GetMessages::new().limit(self.msg_count);
+                        match channel.messages(&ctx.http, builder).await {
                             Ok(existing_messages) => {
                                 let existing_ids = Self::get_ids_from_messages(&existing_messages);
                                 for item in news.iter() {

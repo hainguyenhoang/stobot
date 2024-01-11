@@ -27,7 +27,7 @@ struct Args {
 
     /// Amount of Discord messages to check for already posted news items during each poll. Discord has a limitation of 100.
     #[arg(short, long, default_value_t = 50)]
-    msg_count: u64,
+    msg_count: u8,
 
     /// Space separated list of platforms to filter news from. E.g.: to have news from all 3: `pc ps xbox`
     #[arg(required = true, num_args = 1..)]
