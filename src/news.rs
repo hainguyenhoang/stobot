@@ -13,8 +13,15 @@ pub struct News {
 }
 
 impl News {
-    pub fn filter_news_by_platform(&mut self, platforms: &BTreeSet<String>) {
+    pub fn filter_news_by_platform(&mut self, platforms: &BTreeSet<String>) -> bool{
         self.news.retain(|item| !platforms.is_disjoint(&item.platforms));
+        if self.news.len() >= 1 {
+            true
+        }
+        else {
+            eprintln!("No news item found matching the specified platforms!");
+            false
+        }
     }
 
     pub fn count(&self) -> u64 {
