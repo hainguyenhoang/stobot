@@ -30,17 +30,8 @@ struct Args {
     msg_count: u64,
 
     /// Space separated list of platforms to filter news from. E.g.: to have news from all 3: `pc ps xbox`
-    #[arg()]
+    #[arg(required = true, num_args = 1..)]
     platforms: Vec<String>
-}
-
-pub fn parse_u64_arg() -> Option<u64> {
-    if let Some(next_arg) = env::args().next() {
-        if let Ok(parsed_arg) = next_arg.parse::<u64>() {
-            return Some(parsed_arg);
-        }
-    }
-    None
 }
 
 #[tokio::main]
